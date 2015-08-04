@@ -61,6 +61,7 @@ namespace cerb {
         void push_client_command(util::sref<DataCommand> cmd);
         void pop_client(Client* cli);
         std::vector<util::sref<DataCommand>> deliver_commands();
+        std::string dump_commands() const;
 
         void attach_long_connection(ProxyConnection* c)
         {

@@ -193,3 +193,24 @@ void Client::push_command(util::sptr<CommandGroup> g)
 {
     this->_parsed_groups.push_back(std::move(g));
 }
+
+std::string Client::dump_groups() const
+{
+    std::string r(fmt::format(".Buffer={}\n    Parsed", this->_buffer.to_string()));
+    for (auto const& g: this->_parsed_groups) {
+        r += "\n      :" + g->str();
+    }
+    r += "\n    Awaiting";
+    for (auto const& g: this->_awaiting_groups) {
+        r += "\n      :" + g->str();
+    }
+    r += "\n    Ready";
+    for (auto const& g: this->_ready_groups) {
+        r += "\n      :" + g->str();
+    }
+    r += "\n    Peers";
+    for (Server* s: this->_peers) {
+        r += "\n      :" + s->str();
+    }
+    return std::move(r);
+}

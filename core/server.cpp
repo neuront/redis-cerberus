@@ -165,6 +165,19 @@ std::string Server::str() const
                        static_cast<void const*>(this), this->addr.str());
 }
 
+std::string Server::dump_commands() const
+{
+    std::string r(fmt::format("Buffer={}\n    Awaiting", this->_buffer.to_string()));
+    for (auto const& c: this->_commands) {
+        r += "\n      :" + c->buffer->to_string();
+    }
+    r += "\n    Ready";
+    for (auto const& c: this->_ready_commands) {
+        r += "\n      :" + c->buffer->to_string();
+    }
+    return std::move(r);
+}
+
 void Server::close_conn()
 {
     if (!this->closed()) {

@@ -85,6 +85,7 @@ namespace cerb {
         virtual int total_buffer_size() const = 0;
         virtual void command_responsed() = 0;
         virtual void collect_stats(Proxy*) const {}
+        virtual std::string str() const = 0;
     };
 
     void split_client_command(Buffer& buffer, util::sref<Client> cli);

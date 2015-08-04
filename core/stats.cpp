@@ -12,7 +12,7 @@ std::string cerb::stats_all()
 {
     struct rusage res_usage;
     getrusage(RUSAGE_SELF, &res_usage);
-
+    std::vector<std::string> commands_each_proxy;
     std::vector<std::string> clients_counts;
     std::vector<std::string> long_conns_counts;
     std::vector<std::string> mem_buffer_allocs;
@@ -23,6 +23,7 @@ std::string cerb::stats_all()
     Interval total_remote_cost(0);
     for (auto const& thread: cerb_global::all_threads) {
         util::sref<Proxy const> proxy(thread.get_proxy());
+        commands_each_proxy.push_back(proxy->dump_all());
         clients_counts.push_back(util::str(proxy->clients_count()));
         long_conns_counts.push_back(util::str(proxy->long_conns_count()));
         total_commands += proxy->total_cmd();
@@ -38,6 +39,7 @@ std::string cerb::stats_all()
     }
     return util::join("", {
         "version:" VERSION
+        "\ndump_commands:", util::join("\n", commands_each_proxy),
         "\nthreads:", util::str(msize_t(cerb_global::all_threads.size())),
         "\nread_slave:", ::read_slave ? "1" : "0",
         "\nclients_count:", util::join(",", clients_counts),

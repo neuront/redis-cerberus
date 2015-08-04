@@ -127,6 +127,11 @@ namespace {
         }
 
         void command_responsed() {}
+
+        std::string str() const
+        {
+            return "DIRECT@" + util::str(this);
+        }
     };
 
     class StatsCommandGroup
@@ -154,6 +159,11 @@ namespace {
         }
 
         virtual Interval avg_commands_remote_cost() const = 0;
+
+        std::string str() const
+        {
+            return "STATS@" + util::str(this);
+        }
     };
 
     class SingleCommandGroup
@@ -196,6 +206,11 @@ namespace {
         Interval avg_commands_remote_cost() const
         {
             return command->remote_cost();
+        }
+
+        std::string str() const
+        {
+            return "SINGLE@" + util::str(this) + "#" + this->command->buffer->to_string();
         }
     };
 
@@ -267,6 +282,15 @@ namespace {
                     return a + c->remote_cost();
                 }) / this->commands.size();
         }
+
+        std::string str() const
+        {
+            std::string r("MULTI@" + util::str(this) + "#[");
+            for (auto const& c: this->commands) {
+                r += c->buffer->to_string();
+            }
+            return std::move(r);
+        }
     };
 
     class LongCommandGroup
@@ -295,12 +319,17 @@ namespace {
         void select_remote(Proxy*) {}
         void append_buffer_to(BufferSet&) {}
         void command_responsed() {}
+
+        std::string str() const
+        {
+            return "LONG@" + util::str(this);
+        }
     };
 
     std::string stats_string()
     {
         std::string s(stats_all());
-        return '+' + s + "\r\n";
+        return fmt::format("${}\r\n{}\r\n", s.size(), s);
     }
 
     void notify_each_thread_update_slot_map()

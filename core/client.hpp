@@ -41,6 +41,7 @@ namespace cerb {
         void add_peer(Server* svr);
         void reactivate(util::sref<Command> cmd);
         void push_command(util::sptr<CommandGroup> g);
+        std::string dump_groups() const;
     };
 
 }

@@ -105,6 +105,21 @@ std::string SlotsMapUpdater::str() const
                        static_cast<void const*>(this), this->addr.str());
 }
 
+std::string Proxy::dump_all() const
+{
+    std::string r("Proxy@" + util::str(this) + "\n");
+    for (auto c: this->_clients) {
+        r += fmt::format("  {}{}\n", c->str(), c->dump_groups());
+    }
+    std::for_each(
+        Server::addr_begin(), Server::addr_end(),
+        [&r](std::pair<util::Address, Server*> s)
+        {
+            r += fmt::format("  {}{}\n", s.second->str(), s.second->dump_commands());
+        });
+    return std::move(r);
+}
+
 Proxy::Proxy()
     : _clients_count(0)
     , _long_conns_count(0)
@@ -322,7 +337,7 @@ Server* Proxy::get_server_by_slot(slot key_slot)
 
 void Proxy::new_client(int client_fd)
 {
-    new Client(client_fd, this);
+    this->_clients.insert(new Client(client_fd, this));
     ++this->_clients_count;
 }
 
@@ -335,6 +350,7 @@ void Proxy::pop_client(Client* cli)
         {
             return cmd->group->client.is(cli);
         });
+    this->_clients.erase(cli);
     --this->_clients_count;
 }
 

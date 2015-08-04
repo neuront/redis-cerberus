@@ -1,6 +1,7 @@
 #ifndef __CERBERUS_PROXY_HPP__
 #define __CERBERUS_PROXY_HPP__
 
+#include <set>
 #include <vector>
 #include <map>
 
@@ -68,6 +69,7 @@ namespace cerb {
         int _long_conns_count;
 
         SlotMap _server_map;
+        std::set<Client*> _clients;
         std::vector<util::sptr<SlotsMapUpdater>> _slot_updaters;
         std::vector<util::sptr<SlotsMapUpdater>> _finished_slot_updaters;
         std::vector<util::sref<DataCommand>> _retrying_commands;
@@ -155,6 +157,7 @@ namespace cerb {
             return _server_map.random_addr();
         }
 
+        std::string dump_all() const;
         Server* get_server_by_slot(slot key_slot);
         void notify_slot_map_updated(std::vector<RedisNode> const& nodes,
                                      std::set<util::Address> const& remotes,
