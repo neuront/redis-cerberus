@@ -5,6 +5,7 @@ Build
 
 Requirements:
 
+* `make` and `cmake`
 * UNIX-like system with `SO_REUSEPORT | SO_REUSEADDR` support
 * `epoll` support
 * pthread
