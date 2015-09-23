@@ -315,7 +315,7 @@ TEST_F(ServerClientTest, PipeRemoteCommands)
     ASSERT_RO_CONN(client);
     ASSERT_RO_CONN(server);
 
-    ServerClientTest::io_obj->read_buffer.push_back("yuko\r\n");
+    ServerClientTest::io_obj->read_buffer.push_back("aioi\r\n");
     server->on_events(ManualPoller::EV_READ);
     ServerClientTest::set_polls();
     ASSERT_RW_CONN(client);
@@ -330,7 +330,7 @@ TEST_F(ServerClientTest, PipeRemoteCommands)
     ASSERT_EQ("$10\r\nnaganohara\r\n", ServerClientTest::io_obj->write_buffer[1]);
     ASSERT_EQ("*2\r\n$3\r\n", ServerClientTest::io_obj->write_buffer[2]);
     ASSERT_EQ("GET\r\n$4\r\nyuko\r\n", ServerClientTest::io_obj->write_buffer[3]);
-    ASSERT_EQ("$4\r\nyuko\r\n", ServerClientTest::io_obj->write_buffer[4]);
+    ASSERT_EQ("$4\r\naioi\r\n", ServerClientTest::io_obj->write_buffer[4]);
 }
 
 TEST_F(ServerClientTest, MultipleClientsPipelineTest)
