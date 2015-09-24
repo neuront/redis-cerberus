@@ -20,7 +20,8 @@ namespace cerb {
     {
         Proxy* _proxy;
         Buffer _buffer;
-        BufferSet _output_buffer_set;
+        Buffer _output;
+        // BufferSet _output_buffer_set;
 
         std::vector<util::sref<DataCommand>> _commands;
         std::vector<util::sref<DataCommand>> _ready_commands;

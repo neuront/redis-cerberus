@@ -8,11 +8,13 @@
 #include "concurrence.hpp"
 #include "utils/pointer.h"
 #include "utils/address.hpp"
+#include "utils/object_pool.hpp"
 
 namespace cerb_global {
 
     extern std::vector<cerb::ListenThread> all_threads;
     extern thread_local cerb::msize_t allocated_buffer;
+    extern thread_local util::ObjectPool<util::MemPage> page_pool;
 
     void set_remotes(std::set<util::Address> remotes);
     std::set<util::Address> get_remotes();

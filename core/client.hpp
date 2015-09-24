@@ -24,7 +24,8 @@ namespace cerb {
         std::vector<util::sptr<CommandGroup>> _ready_groups;
         int _awaiting_count;
         Buffer _buffer;
-        BufferSet _output_buffer_set;
+        // BufferSet _output_buffer_set;
+        Buffer _output;
 
         void _process();
         void _send_buffer_set();

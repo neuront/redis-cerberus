@@ -67,7 +67,7 @@ std::string Client::str() const
 
 void Client::_send_buffer_set()
 {
-    if (this->_output_buffer_set.writev(this->fd)) {
+    if (this->_output.flush(this->fd)) {
         for (auto const& g: this->_ready_groups) {
             g->collect_stats(this->_proxy);
         }
@@ -85,7 +85,7 @@ void Client::_send_buffer_set()
 
 void Client::_write_response()
 {
-    if (!this->_output_buffer_set.empty()) {
+    if (!this->_output.empty()) {
         this->_send_buffer_set();
     }
     if (this->_awaiting_groups.empty() || _awaiting_count != 0) {
@@ -96,9 +96,9 @@ void Client::_write_response()
         return;
     }
 
-    this->_ready_groups = std::move(this->_awaiting_groups);
+    this->_ready_groups.swap(this->_awaiting_groups);
     for (auto const& g: this->_ready_groups) {
-        g->append_buffer_to(this->_output_buffer_set);
+        g->append_buffer_to(this->_output);
     }
     this->_send_buffer_set();
 }

@@ -8,7 +8,8 @@
 
 using namespace cerb;
 
-Buffer const Response::NIL(Buffer::from_string("$-1\r\n"));
+std::string const Response::NIL_STR("$-1\r\n");
+Buffer const Response::NIL(Buffer::from_string(NIL_STR));
 
 namespace {
 
@@ -29,7 +30,7 @@ namespace {
             cmd->on_remote_responsed(std::move(this->rsp), error);
         }
 
-        Buffer const& get_buffer() const
+        Buffer& get_buffer()
         {
             return rsp;
         }
@@ -38,14 +39,14 @@ namespace {
     class RetryMovedAskResponse
         : public Response
     {
-        static Buffer const dump;
+        static Buffer dump;
     public:
         void rsp_to(util::sref<DataCommand> cmd, util::sref<Proxy> p)
         {
             p->retry_move_ask_command_later(cmd);
         }
 
-        Buffer const& get_buffer() const
+        Buffer& get_buffer()
         {
             return dump;
         }
@@ -55,8 +56,7 @@ namespace {
             return true;
         }
     };
-    Buffer const RetryMovedAskResponse::dump(
-        Buffer::from_string("$ RETRY MOVED OR ASK $"));
+    Buffer RetryMovedAskResponse::dump(Buffer::from_string("$ RETRY MOVED OR ASK $"));
 
     class ServerResponseSplitter
         : public cerb::msg::MessageSplitterBase<

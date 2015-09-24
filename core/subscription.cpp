@@ -70,7 +70,8 @@ Subscription::ServerConn::ServerConn(util::Address const& addr,
 {
     fctl::set_nonblocking(this->fd);
     fctl::connect_fd(addr.host, addr.port, this->fd);
-    subs_cmd.write(this->fd);
+    while (!subs_cmd.flush(this->fd))
+        ;
 }
 
 void Subscription::ServerConn::on_events(int events)
@@ -84,7 +85,8 @@ void Subscription::ServerConn::on_events(int events)
             LOG(ERROR) << "Read 0 byte on " << this->str();
             return this->on_error();
         }
-        b.write(this->_peer->fd);
+        while (!b.flush(this->_peer->fd))
+            ;
     }
     if (poll::event_is_write(events)) {
         LOG(DEBUG) << "UNEXPECTED write on " << this->str();
@@ -130,12 +132,24 @@ std::string BlockedListPop::str() const
                        this->_server.fd, static_cast<void const*>(&this->_server));
 }
 
-void BlockedListPop::restore_client(Buffer const& rsp, bool update_slot_map)
+void BlockedListPop::_write_to_client(Buffer& rsp)
+{
+    while (!rsp.flush(this->fd))
+        ;
+}
+
+void BlockedListPop::_write_to_client(std::string const& rsp)
+{
+    flush_string(this->fd, rsp);
+}
+
+template <typename T>
+void BlockedListPop::_restore_client(T&& rsp, bool update_slot_map)
 {
     if (this->closed()) {
         return;
     }
-    rsp.write(this->fd);
+    this->_write_to_client(rsp);
     LOG(DEBUG) << "Restore to normal client " << this->str();
     this->_proxy->poll_del(this);
     this->_proxy->new_client(this->fd);
@@ -152,7 +166,8 @@ BlockedListPop::ServerConn::ServerConn(util::Address const& addr,
 {
     fctl::set_nonblocking(this->fd);
     fctl::connect_fd(addr.host, addr.port, this->fd);
-    subs_cmd.write(this->fd);
+    while (!subs_cmd.flush(this->fd))
+        ;
 }
 
 void BlockedListPop::ServerConn::on_events(int events)
@@ -171,9 +186,9 @@ void BlockedListPop::ServerConn::on_events(int events)
         }
         if (responses[0]->server_moved()) {
             LOG(DEBUG) << "Server moved pop connection " << this->str();
-            this->_peer->restore_client(Response::NIL, true);
+            this->_peer->_restore_client(Response::NIL_STR, true);
         } else {
-            this->_peer->restore_client(responses[0]->get_buffer(), false);
+            this->_peer->_restore_client(responses[0]->get_buffer(), false);
         }
     }
     if (poll::event_is_write(events)) {
@@ -185,7 +200,7 @@ void BlockedListPop::ServerConn::on_events(int events)
 void BlockedListPop::ServerConn::on_error()
 {
     this->close();
-    this->_peer->restore_client(Response::NIL, true);
+    this->_peer->_restore_client(Response::NIL_STR, true);
 }
 
 void BlockedListPop::ServerConn::after_events(std::set<Connection*>& active_conns)

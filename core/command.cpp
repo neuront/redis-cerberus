@@ -20,7 +20,7 @@ using namespace cerb;
 namespace {
 
     std::string const RSP_OK_STR("+OK\r\n");
-    Buffer RSP_OK(Buffer::from_string(RSP_OK_STR));
+    Buffer const RSP_OK(Buffer::from_string(RSP_OK_STR));
 
     Server* select_server_for(Proxy* proxy, DataCommand* cmd, slot key_slot)
     {
@@ -116,9 +116,9 @@ namespace {
 
         void select_remote(Proxy*) {}
 
-        void append_buffer_to(BufferSet& b)
+        void append_buffer_to(Buffer& b)
         {
-            b.append(util::mkref(command->buffer));
+            b.append_all(command->buffer);
         }
 
         int total_buffer_size() const
@@ -178,9 +178,9 @@ namespace {
             this->complete = true;
         }
 
-        void append_buffer_to(BufferSet& b)
+        void append_buffer_to(Buffer& b)
         {
-            b.append(util::mkref(command->buffer));
+            b.append_all(command->buffer);
         }
 
         int total_buffer_size() const
@@ -230,11 +230,11 @@ namespace {
             }
         }
 
-        void append_buffer_to(BufferSet& b)
+        void append_buffer_to(Buffer& b)
         {
-            b.append(util::mkref(arr_payload));
+            b.append_all(arr_payload);
             for (auto const& c: this->commands) {
-                b.append(util::mkref(c->buffer));
+                b.append_all(c->buffer);
             }
         }
 
@@ -292,7 +292,7 @@ namespace {
         }
 
         void select_remote(Proxy*) {}
-        void append_buffer_to(BufferSet&) {}
+        void append_buffer_to(Buffer&) {}
         void command_responsed() {}
     };
 
@@ -551,9 +551,9 @@ namespace {
                 : MultipleCommandsGroup(c)
             {}
 
-            void append_buffer_to(BufferSet& b)
+            void append_buffer_to(Buffer& b)
             {
-                b.append(util::mkref(RSP_OK));
+                b.append_all(RSP_OK);
             }
 
             int total_buffer_size() const

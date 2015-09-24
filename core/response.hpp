@@ -18,9 +18,10 @@ namespace cerb {
         Response(Response const&) = delete;
 
         virtual void rsp_to(util::sref<DataCommand> c, util::sref<Proxy> p) = 0;
-        virtual Buffer const& get_buffer() const = 0;
+        virtual Buffer& get_buffer() = 0;
         virtual bool server_moved() const { return false; }
 
+        static std::string const NIL_STR;
         static Buffer const NIL;
     };
 

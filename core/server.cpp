@@ -40,7 +40,7 @@ void Server::on_events(int events)
 
 void Server::_send_buffer_set()
 {
-    if (this->_output_buffer_set.writev(this->fd)) {
+    if (this->_output.flush(this->fd)) {
         this->_proxy->set_conn_poll_ro(this);
     } else {
         this->_proxy->set_conn_poll_rw(this);
@@ -49,7 +49,7 @@ void Server::_send_buffer_set()
 
 void Server::_send_to()
 {
-    if (!this->_output_buffer_set.empty()) {
+    if (!this->_output.empty()) {
         return this->_send_buffer_set();
     }
     if (this->_commands.empty()) {
@@ -62,7 +62,7 @@ void Server::_send_to()
 
     this->_ready_commands.swap(this->_commands);
     for (util::sref<DataCommand> c: this->_ready_commands) {
-        this->_output_buffer_set.append(util::mkref(c->buffer));
+        this->_output.append_all(c->buffer);
     }
     this->_send_buffer_set();
     auto now = Clock::now();
@@ -171,6 +171,7 @@ void Server::close_conn()
         LOG(INFO) << "Close " << this->str();
         this->close();
         this->_buffer.clear();
+        this->_output.clear();
 
         for (util::sref<DataCommand> c: this->_commands) {
             this->_proxy->retry_move_ask_command_later(c);
@@ -250,14 +251,14 @@ Server* Server::get_server(util::Address addr, Proxy* p)
     return i->second;
 }
 
-static Buffer const READ_ONLY_CMD(Buffer::from_string("READONLY\r\n"));
+static std::string const READONLY_CMD("READONLY\r\n");
 
 void Server::send_readonly_for_each_conn()
 {
     ::on_server_connected =
         [](int fd, std::vector<util::sref<DataCommand>>& cmds)
         {
-            READ_ONLY_CMD.write(fd);
+            flush_string(fd, READONLY_CMD);
             cmds.push_back(util::sref<DataCommand>(nullptr));
         };
 }

@@ -6,6 +6,7 @@
 #include <fstream>
 #include <stdexcept>
 
+#include "core/stats.hpp"
 #include "core/globals.hpp"
 #include "core/command.hpp"
 #include "core/server.hpp"

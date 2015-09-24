@@ -62,12 +62,17 @@ namespace cerb {
 
         ServerConn _server;
         Proxy* const _proxy;
+
+        void _write_to_client(Buffer& rsp);
+        void _write_to_client(std::string const& rsp);
+
+        template <typename T>
+        void _restore_client(T&& rsp, bool update_slot_map);
     public:
         BlockedListPop(Proxy* proxy, int clientfd, Server* peer, Buffer cmd);
 
         void after_events(std::set<Connection*>& active_conns);
         std::string str() const;
-        void restore_client(Buffer const& rsp, bool update_slot_map);
     };
 
 }
